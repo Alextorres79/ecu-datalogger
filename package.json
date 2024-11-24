@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "eslint-plugin-vue": "^9.31.0"
+  }
+}
