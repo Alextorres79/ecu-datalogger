@@ -1,0 +1,42 @@
+[
+    {
+        "id": "7ff75b80b09c4111842796956ec0a344",
+        "Setting": "Wifi Name",
+        "Value": "Alex Casa"
+    },
+    {
+        "id": "3aef43ff7c234c23847e69178a93f3c6",
+        "Setting": "Wifi Password",
+        "Value": "sdfagh"
+    },
+    {
+        "id": "c85db12a69f74d21813c0636e0e1ca69",
+        "Setting": "Speed Sensor Pin",
+        "Value": "1"
+    },
+    {
+        "id": "d85c6999685446e5be69ecdac4ec5146",
+        "Setting": "RPM Sensor Pin",
+        "Value": "2"
+    },
+    {
+        "id": "a9410984aa6e486b80655bc8012310e5",
+        "Setting": "Oil Pressure Sensor Pin",
+        "Value": "3"
+    },
+    {
+        "id": "4da73f0763e44616b8097c6e3b497977",
+        "Setting": "Fuel Pressure Sensor Pin",
+        "Value": "4"
+    },
+    {
+        "id": "1c363063c64c4f20bc1e4fb09f08eebc",
+        "Setting": "Oil Temperature Sensor Pin",
+        "Value": "5"
+    },
+    {
+        "id": "a096153522f948d2a374cea1135e7a51",
+        "Setting": "Water Temp Sensor Pin",
+        "Value": "6"
+    }
+]

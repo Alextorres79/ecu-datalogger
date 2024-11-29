@@ -1,0 +1,42 @@
+[
+    {
+        "Setting": "Wifi Name",
+        "Value": "SkyNetwork",
+        "id": "some-uuid-1"
+    },
+    {
+        "Setting": "Wifi Password",
+        "Value": "apiosdojg",
+        "id": "some-uuid-2"
+    },
+    {
+        "Setting": "Speed Sensor Pin",
+        "Value": "1",
+        "id": "some-uuid-3"
+    },
+    {
+        "Setting": "RPM Sensor Pin",
+        "Value": "2",
+        "id": "some-uuid-4"
+    },
+    {
+        "Setting": "Oil Pressure Sensor Pin",
+        "Value": "3",
+        "id": "some-uuid-5"
+    },
+    {
+        "Setting": "Fuel Pressure Sensor Pin",
+        "Value": "4",
+        "id": "some-uuid-6"
+    },
+    {
+        "Setting": "Oil Temperature Sensor Pin",
+        "Value": "5",
+        "id": "some-uuid-7"
+    },
+    {
+        "Setting": "Water Temp Sensor Pin",
+        "Value": "6",
+        "id": "some-uuid-8"
+    }
+]

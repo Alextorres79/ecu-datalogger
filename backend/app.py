@@ -1,38 +1,122 @@
-from flask import Flask, render_template, url_for, jsonify
+import json
+import uuid
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+import os
 
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-app= Flask(__name__)
-app.config.from_object(__name__)
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///test.db'
-db = SQLAlchemy(app)
+# Archivos JSON para almacenar configuraciones
+DEFAULT_SETTINGS_FILE = 'car_Default_Settings.json'
+CURRENT_SETTINGS_FILE = 'car_Current_Settings.json'
 
-CORS(app, resources={r"/*":{'origins': "*"}})
-CORS(app, resources={r"/*":{'origins': 'http://localhost:8080',"allow_headers":"Access-Control-Allow-Origin"}})
+def load_settings(file_path):
+    """Cargar configuraciones desde un archivo JSON."""
+    if not os.path.exists(file_path):
+        return []  # Si no existe, retornar una lista vacía
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
+def save_settings(file_path, settings):
+    """Guardar configuraciones en un archivo JSON."""
+    with open(file_path, 'w') as file:
+        json.dump(settings, file, indent=4)
 
-class Session(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name =  db.Column(db.String(200), nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-    ambient_temp = db.Column(db.String(200), nullable=True)
-    weather_conditions = db.Column(db.String(200), nullable=True)
-    track_conditions = db.Column(db.String(200), nullable=True)
-    setup_sheet = db.Text()
+# Crear los archivos si no existen con valores predeterminados
+if not os.path.exists(DEFAULT_SETTINGS_FILE):
+    save_settings(DEFAULT_SETTINGS_FILE, [
+        {"Setting": "Volume", "Value": "50"},
+        {"Setting": "Brightness", "Value": "70"},
+        {"Setting": "Language", "Value": "English"}
+    ])
 
-    def __repr__(self):
-        return '<Session %r>' % self.id
-    
-    
-with app.app_context():
-        db.create_all()
+if not os.path.exists(CURRENT_SETTINGS_FILE):
+    save_settings(CURRENT_SETTINGS_FILE, [
+        {"id": uuid.uuid4().hex, "Setting": "Volume", "Value": "50"},
+        {"id": uuid.uuid4().hex, "Setting": "Brightness", "Value": "70"},
+        {"id": uuid.uuid4().hex, "Setting": "Language", "Value": "English"}
+    ])
 
+@app.route('/landing', methods=['GET', 'POST'])
+def all_settings():
+    """Obtener o añadir configuraciones."""
+    response_object = {'status': 'success'}
+    current_settings = load_settings(CURRENT_SETTINGS_FILE)
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template('index.html')
+    if request.method == 'POST':
+        post_data = request.get_json()
+        new_setting = {
+            'id': uuid.uuid4().hex,
+            'Setting': post_data.get('Setting'),
+            'Value': post_data.get('Value')
+        }
+        current_settings.append(new_setting)
+        save_settings(CURRENT_SETTINGS_FILE, current_settings)
+        response_object['message'] = 'Setting added successfully'
+    else:
+        response_object['settings'] = current_settings
 
-if __name__== "__main__":
+    return jsonify(response_object)
+
+@app.route('/landing/<setting_id>', methods=['PUT'])
+def update_setting(setting_id):
+    """Actualizar un valor específico."""
+    response_object = {'status': 'success'}
+    current_settings = load_settings(CURRENT_SETTINGS_FILE)
+    put_data = request.get_json()
+
+    for setting in current_settings:
+        if setting['id'] == setting_id:
+            setting['Value'] = put_data.get('Value')
+            save_settings(CURRENT_SETTINGS_FILE, current_settings)
+            response_object['message'] = 'Setting updated successfully'
+            break
+    else:
+        response_object['message'] = 'Setting not found'
+
+    return jsonify(response_object)
+
+@app.route('/landing/<setting_id>/reset', methods=['PUT'])
+def reset_setting(setting_id):
+    """Restablecer un valor específico al predeterminado."""
+    response_object = {'status': 'success'}
+    current_settings = load_settings(CURRENT_SETTINGS_FILE)
+    default_settings = load_settings(DEFAULT_SETTINGS_FILE)
+
+    for setting in current_settings:
+        if setting['id'] == setting_id:
+            for default in default_settings:
+                if setting['Setting'] == default['Setting']:
+                    setting['Value'] = default['Value']
+                    save_settings(CURRENT_SETTINGS_FILE, current_settings)
+                    response_object['message'] = 'Setting reset to default'
+                    break
+            else:
+                response_object['message'] = 'Default setting not found'
+            break
+    else:
+        response_object['message'] = 'Setting not found'
+
+    return jsonify(response_object)
+
+@app.route('/landing/reset', methods=['PUT'])
+def reset_all_settings():
+    """Restablecer todos los valores al predeterminado."""
+    response_object = {'status': 'success'}
+    default_settings = load_settings(DEFAULT_SETTINGS_FILE)
+
+    current_settings = [
+        {
+            'id': uuid.uuid4().hex,
+            'Setting': default['Setting'],
+            'Value': default['Value']
+        } for default in default_settings
+    ]
+    save_settings(CURRENT_SETTINGS_FILE, current_settings)
+    response_object['message'] = 'All settings reset to default'
+    return jsonify(response_object)
+
+if __name__ == '__main__':
     app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
